@@ -13,14 +13,18 @@ WORKDIR /app
 
 # Copy installed deps
 COPY --from=builder /root/.local /root/.local
-ENV PATH=/root/.local/bin:$PATH
-
 # Copy app
 COPY attendance_system_flask/ .
+
+# Install deps system-wide for non-root access
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Create non-root user
 RUN useradd --create-home appuser && chown -R appuser:appuser /app
 USER appuser
+
+# Gunicorn now accessible
+ENV PATH="/home/appuser/.local/bin:${PATH}"
 
 EXPOSE 5000
 
